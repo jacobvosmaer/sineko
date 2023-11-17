@@ -29,7 +29,7 @@ static u32 sample_rate = 96000;
 static struct {
 	u32 phase;
 	s32 sample;
-	u32 frequency;
+	u32 period;
 	int out_byte;
 } sine = { 0 };
 
@@ -60,7 +60,7 @@ static struct file_operations sine_fops = {
 
 static int __init sine_init(void)
 {
-	sine.frequency = sample_rate / 220;
+	sine.period = sample_rate / 220;
 
 	major = register_chrdev(0, DEVICE_NAME, &sine_fops);
 
@@ -139,7 +139,7 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
 			sine.out_byte = 0;
 			sine.phase++;
 			sine.sample =
-				fixp_sin32_rad(sine.phase, sine.frequency);
+				fixp_sin32_rad(sine.phase, sine.period);
 		}
 		put_user(0xff & (sine.sample >> (8 * sine.out_byte++)),
 			 buffer++);
