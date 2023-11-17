@@ -4,6 +4,8 @@ Based on this awesome book: https://sysprog21.github.io/lkmpg/#character-device-
 
 Buggy but if you're lucky produces 220Hz sine wave.
 
+Compile with `make`. Then load the module with `insmod sine.ko`.
+
 Play the sine wave with `play` (part of SoX):
 
 ```
