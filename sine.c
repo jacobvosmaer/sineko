@@ -1,6 +1,7 @@
 /*
  * sine.c: Creates a read-only char device that says how many times
  * you have read from the dev file
+ * Based on https://github.com/sysprog21/lkmpg/blob/3490cd7c418cdb6e2a193366cf78659a688f3748/examples/chardev.c
  */
 
 #include <linux/atomic.h>
