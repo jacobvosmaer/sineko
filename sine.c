@@ -5,12 +5,10 @@
 
 #include <linux/atomic.h>
 #include <linux/cdev.h>
-#include <linux/delay.h>
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/fixp-arith.h>
 #include <linux/init.h>
-#include <linux/kernel.h> /* for sprintf() */
 #include <linux/module.h>
 #include <linux/printk.h>
 #include <linux/types.h>
@@ -50,8 +48,6 @@ enum {
 
 /* Is device open? Used to prevent multiple access to device */
 static atomic_t already_open = ATOMIC_INIT(CDEV_NOT_USED);
-
-static char msg[BUF_LEN + 1]; /* The msg the device will give when asked */
 
 static struct class *cls;
 
@@ -103,13 +99,11 @@ static void __exit sine_exit(void)
  */
 static int device_open(struct inode *inode, struct file *file)
 {
-	static int counter = 0;
-
 	if (atomic_cmpxchg(&already_open, CDEV_NOT_USED, CDEV_EXCLUSIVE_OPEN))
 		return -EBUSY;
 
-	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
 	try_module_get(THIS_MODULE);
+	sine.out_byte = 0;
 
 	return SUCCESS;
 }
