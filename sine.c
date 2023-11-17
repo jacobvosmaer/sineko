@@ -29,8 +29,11 @@ static u32 sample_rate = 96000;
 
 static struct {
 	u32 phase;
-	s32 sample;
 	u32 period;
+	/* Because read calls from userspace need not end on a sample
+	 * boundary we need to remember the current sample and our offset
+	 * in it across read calls. */
+	s32 sample;
 	u32 out_byte;
 } sine = { 0 };
 
@@ -131,11 +134,9 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
 			   size_t length, /* length of the buffer     */
 			   loff_t *offset)
 {
-	/* Number of bytes actually written to the buffer */
-	int bytes_read = 0;
+	int i;
 
-	/* Actually put the data into the buffer */
-	for (; length; length--, bytes_read++) {
+	for (i = 0; i < length; i++) {
 		if (!(sine.out_byte % 4)) {
 			sine.out_byte = 0;
 			sine.sample = fixp_sin32_rad(sine.phase++, sine.period);
@@ -144,10 +145,8 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
 			 buffer++);
 	}
 
-	*offset += bytes_read;
-
-	/* Most read functions return the number of bytes put into the buffer. */
-	return bytes_read;
+	*offset += length;
+	return length;
 }
 
 /* Called when a process writes to dev file: echo "hi" > /dev/hello */
