@@ -30,7 +30,7 @@ static struct {
 	u32 phase;
 	s32 sample;
 	u32 period;
-	int out_byte;
+	u32 out_byte;
 } sine = { 0 };
 
 #define SUCCESS 0
@@ -134,17 +134,11 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
 	int bytes_read = 0;
 
 	/* Actually put the data into the buffer */
-	while (length) {
-		if (!(sine.out_byte % 4)) {
-			sine.out_byte = 0;
-			sine.phase++;
-			sine.sample =
-				fixp_sin32_rad(sine.phase, sine.period);
-		}
+	for (; length; length--, bytes_read++) {
+		if (!(sine.out_byte % 4))
+			sine.sample = fixp_sin32_rad(sine.phase++, sine.period);
 		put_user(0xff & (sine.sample >> (8 * sine.out_byte++)),
 			 buffer++);
-		length--;
-		bytes_read++;
 	}
 
 	*offset += bytes_read;
