@@ -136,8 +136,10 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
 
 	/* Actually put the data into the buffer */
 	for (; length; length--, bytes_read++) {
-		if (!(sine.out_byte % 4))
+		if (!(sine.out_byte % 4)) {
+			sine.out_byte = 0;
 			sine.sample = fixp_sin32_rad(sine.phase++, sine.period);
+		}
 		put_user(0xff & (sine.sample >> (8 * sine.out_byte++)),
 			 buffer++);
 	}
